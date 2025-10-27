@@ -17,7 +17,7 @@ This module is designed to be used as a submodule by other datastore-specific mo
 
 ```hcl
 module "universal_connector" {
-  source = "../../universal-connector/install-gdp-connector"
+  source = "IBM/gdp/guardium//modules/connect-datasource-to-uc"
   
   udc_name              = "my-connector-name"
   udc_csv_parsed        = local.connector_csv_content
@@ -74,7 +74,7 @@ This module is used by the AWS DocumentDB audit configuration module to create a
 
 ```hcl
 module "universal_connector" {
-  source = "../../universal-connector/install-gdp-connector"
+  source = "IBM/gdp/guardium//modules/connect-datasource-to-uc"
   count  = var.enable_universal_connector ? 1 : 0
   
   udc_name = local.udc_name

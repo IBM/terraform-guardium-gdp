@@ -21,7 +21,7 @@ This Terraform module registers a data source with Guardium Data Protection usin
 
 ```hcl
 module "connect_datasource" {
-  source = "../../modules/vulnerability-assessment/connect-datasource-to-gdp"
+  source = "IBM/gdp/guardium//modules/connect-datasource-to-va"
 
   # Guardium Connection
   gdp_server            = "guardium.example.com"
