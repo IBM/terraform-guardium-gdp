@@ -1,77 +1,186 @@
-<!-- This should be the location of the title of the repository, normally the short name -->
-# repo-template
+# IBM Guardium Data Protection Terraform Module
 
-<!-- Build Status, is a great thing to have at the top of your repository, it shows that you take your CI/CD as first class citizens -->
-<!-- [![Build Status](https://travis-ci.org/jjasghar/ibm-cloud-cli.svg?branch=master)](https://travis-ci.org/jjasghar/ibm-cloud-cli) -->
+Terraform module which creates IBM Guardium Data Protection (GDP) integration resources for AWS datastores.
 
-<!-- Not always needed, but a scope helps the user understand in a short sentance like below, why this repo exists -->
 ## Scope
 
-The purpose of this project is to provide a template for new open source repositories.
+This project provides Terraform modules for automating the integration of various AWS data stores with IBM Guardium Data Protection. It enables audit logging, vulnerability assessment, and security monitoring for AWS databases including RDS PostgreSQL, RDS MariaDB, DynamoDB, DocumentDB, and Redshift.
 
-<!-- A more detailed Usage or detailed explaination of the repository here -->
+## Related Modules
+
+This module is used by the following higher-level Guardium Terraform modules:
+
+- **[IBM Guardium Datastore Vulnerability Assessment Module](https://registry.terraform.io/modules/IBM/datastore-va/guardium/latest)** - Provides comprehensive vulnerability assessment capabilities for AWS datastores
+- **[IBM Guardium Datastore Audit Module](https://registry.terraform.io/modules/IBM/datastore-audit/guardium/latest)** - Provides audit logging and monitoring capabilities for AWS datastores
+
+These modules build upon the foundational integration capabilities provided by this module to deliver complete end-to-end solutions for database security and compliance.
+
 ## Usage
 
-This repository contains some example best practices for open source repositories:
+### Prerequisites
 
-* [LICENSE](LICENSE)
-* [README.md](README.md)
-* [CONTRIBUTING.md](CONTRIBUTING.md)
-* [MAINTAINERS.md](MAINTAINERS.md)
-<!-- A Changelog allows you to track major changes and things that happen, https://github.com/github-changelog-generator/github-changelog-generator can help automate the process -->
-* [CHANGELOG.md](CHANGELOG.md)
+Before using these modules, ensure you have:
 
-> These are optional
+1. **Guardium Data Protection Cluster**: You must have your own Guardium Data Protection (GDP) cluster set up and running.
 
-<!-- The following are OPTIONAL, but strongly suggested to have in your repository. -->
-* [dco.yml](.github/dco.yml) - This enables DCO bot for you, please take a look https://github.com/probot/dco for more details.
-* [travis.yml](.travis.yml) - This is a example `.travis.yml`, please take a look https://docs.travis-ci.com/user/tutorial/ for more details.
+2. **Guardium Configuration**: Complete the one-time manual configurations on your Guardium Data Protection instance as described in the [Preparing Guardium Documentation](docs/preparing-guardium.md). These configurations include:
+    - Enabling OAuth client for REST API access
+    - Configuring AWS credentials in Universal Connector
+    - Setting up SSH access for Terraform
 
-These may be copied into a new or existing project to make it easier for developers not on a project team to collaborate.
+3. **Terraform Setup**:
 
-<!-- A notes section is useful for anything that isn't covered in the Usage or Scope. Like what we have below. -->
-## Notes
+   a. **Install Terraform** (version v1.9.8 or later required):
+    - For macOS:
+      ```bash
+      brew install terraform
+      ```
+    - For Linux (Ubuntu/Debian):
+      ```bash
+      sudo apt-get update && sudo apt-get install -y software-properties-common
+      sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+      sudo apt-get update && sudo apt-get install terraform
+      ```
+    - For Linux (Amazon Linux/RHEL/CentOS):
+      ```bash
+      sudo yum install -y yum-utils
+      sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+      sudo yum -y install terraform
+      ```
+    - For Windows:
+      Download and run the installer from [Terraform Download Page](https://www.terraform.io/downloads)
 
-**NOTE: While this boilerplate project uses the Apache 2.0 license, when
-establishing a new repo using this template, please use the
-license that was approved for your project.**
+   b. **Verify Terraform Installation**:
+   ```bash
+   terraform version
+   ```
+   Ensure the output shows version v1.9.8 or later.
 
-**NOTE: This repository has been configured with the [DCO bot](https://github.com/probot/dco).
-When you set up a new repository that uses the Apache license, you should
-use the DCO to manage contributions. The DCO bot will help enforce that.
-Please contact one of the IBM GH Org stewards.**
+### Connect Datasource to Universal Connector
 
-<!-- Questions can be useful but optional, this gives you a place to say, "This is how to contact this project maintainers or create PRs -->
-If you have any questions or issues you can create a new [issue here][issues].
+Configures AWS datastores for audit logging and integrates with Guardium Universal Connector.
 
-Pull requests are very welcome! Make sure your patches are well tested.
-Ideally create a topic branch for every separate change you make. For
-example:
+```hcl
+module "connect_datasource_to_uc" {
+  source = "terraform-ibm-modules/guardium-gdp/ibm//modules/connect-datasource-to-uc"
 
-1. Fork the repo
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+  # Datastore configuration
+  datastore_type = "aws-dynamodb"  # or "aws-documentdb", "aws-mariadb", "aws-postgresql"
+  datastore_name = "my-database"
+  
+  # AWS configuration
+  aws_region     = "us-east-1"
+  aws_account_id = "123456789012"
+  
+  # Guardium configuration
+  guardium_host     = "guardium.example.com"
+  guardium_username = "admin"
+  guardium_password = var.guardium_password
+  
+  tags = {
+    Environment = "production"
+    ManagedBy   = "terraform"
+  }
+}
+```
+
+### Connect Datasource to Vulnerability Assessment
+
+Configures AWS datastores for vulnerability assessment and integrates with Guardium.
+
+```hcl
+module "connect_datasource_to_va" {
+  source = "terraform-ibm-modules/guardium-gdp/ibm//modules/connect-datasource-to-va"
+
+  # Datastore configuration
+  datastore_type = "aws-rds-postgresql"  # or "aws-dynamodb", "aws-redshift"
+  datastore_name = "my-database"
+  
+  # Database connection details
+  db_host     = "mydb.cluster-abc123.us-east-1.rds.amazonaws.com"
+  db_port     = 5432
+  db_name     = "postgres"
+  db_username = "sqlguard"
+  db_password = var.db_password
+  
+  # Guardium configuration
+  guardium_host     = "guardium.example.com"
+  guardium_username = "admin"
+  guardium_password = var.guardium_password
+  
+  tags = {
+    Environment = "production"
+    ManagedBy   = "terraform"
+  }
+}
+```
+
+## High-Level Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│              Guardium Data Protection Terraform Module           │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+                              │
+                              │
+                ┌─────────────┴─────────────┐
+                │                           │
+                ▼                           ▼
+    ┌───────────────────────┐   ┌───────────────────────┐
+    │  Universal Connector  │   │ Vulnerability         │
+    │  Integration          │   │ Assessment            │
+    │  (Audit Logging)      │   │ Integration           │
+    └───────────────────────┘   └───────────────────────┘
+                │                           │
+                │                           │
+                ▼                           ▼
+    ┌───────────────────────┐   ┌───────────────────────┐
+    │  AWS Datastores       │   │  AWS Datastores       │
+    │  - DynamoDB           │   │  - RDS PostgreSQL     │
+    │  - DocumentDB         │   │  - DynamoDB           │
+    │  - RDS MariaDB        │   │  - Redshift           │
+    │  - RDS PostgreSQL     │   │                       │
+    └───────────────────────┘   └───────────────────────┘
+                │                           │
+                └─────────────┬─────────────┘
+                              │
+                              ▼
+                ┌─────────────────────────┐
+                │                         │
+                │  Guardium Data          │
+                │  Protection (GDP)       │
+                │                         │
+                └─────────────────────────┘
+```
+
+This architecture shows how the Terraform module integrates AWS datastores with IBM Guardium Data Protection through two main integration paths:
+
+1. **Universal Connector (UC)**: Provides audit logging and monitoring for AWS datastores
+2. **Vulnerability Assessment (VA)**: Enables security scanning and assessment capabilities
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## Support
+
+For issues and questions:
+- Create an issue in this repository
+- Contact the maintainers listed in [MAINTAINERS.md](MAINTAINERS.md)
 
 ## License
 
-All source files must include a Copyright and License header. The SPDX license header is 
-preferred because it can be easily scanned.
-
-If you would like to see the detailed LICENSE click [here](LICENSE).
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
 
 ```text
 #
-# Copyright IBM Corp. {Year project was created} - {Current Year}
+# Copyright IBM Corp. 2025
 # SPDX-License-Identifier: Apache-2.0
 #
 ```
+
 ## Authors
 
-Optionally, you may include a list of authors, though this is redundant with the built-in
-GitHub list of contributors.
-
-- Author: New OpenSource IBMer <new-opensource-ibmer@ibm.com>
-
-[issues]: https://github.com/IBM/repo-template/issues/new
+Module is maintained by IBM with help from [these awesome contributors](https://github.com/IBM/terraform-guardium-datastore-va/graphs/contributors).
