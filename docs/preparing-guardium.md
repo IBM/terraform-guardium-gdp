@@ -61,32 +61,6 @@ The modules use SSH to upload configuration files to Guardium. You need to:
    ssh -i ~/.ssh/guardium_key root@your-guardium-server
    ```
 
-### 4. Configure Terraform to Use Artifactory
-
-Important: The following configuration must be performed on your local machine or laptop — the same environment where you will run `terraform init` and `terraform apply`.
-
-This ensures Terraform can authenticate and pull providers from our private registry.
-
-```bash
-# log into na.artifactory.swg-devops.com 
-terraform login na.artifactory.swg-devops.com
-```
-
-Create or update your `~/.terraformrc` file (or `terraform.rc` on Windows) to include your private registry:
-```hcl
-provider_installation {
-    direct {
-        include = ["registry.terraform.io/*/*"]
-    }
-    
-    network_mirror {
-        url = "https://na.artifactory.swg-devops.com/artifactory/api/terraform/sec-guardium-next-gen-terraform-local/providers/"
-    }
-}
-```
-
-> You can get the Artifactory credentials by logging in to [https://na.artifactory.swg-devops.com/ui/repos/tree/General/sec-guardium-next-gen-terraform-local](https://na.artifactory.swg-devops.com/ui/repos/tree/General/sec-guardium-next-gen-terraform-local), clicking the profile icon, selecting "Set Me Up", choosing the Terraform icon, and clicking the "Generate Token" button.
-
 ## Troubleshooting
 
 ### OAuth Client Registration Issues
