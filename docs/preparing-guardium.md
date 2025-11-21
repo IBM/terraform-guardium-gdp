@@ -16,10 +16,7 @@ The modules require API access to Guardium. You need to register an OAuth client
 
 ```bash
 # SSH into your Guardium Central Manager
-ssh root@your-guardium-server
-
-# Switch to CLI mode
-su cli
+ssh cli@your-guardium-server
 
 # Register the OAuth client
 # Replace "test1" with your desired client_id name
