@@ -33,7 +33,7 @@ This command will output a client secret. **Make sure to save this client secret
 4. Select **AWS** as the credential type
 5. Enter the following information:
   - **Name**: Enter a name for the credential (use this same name for the `udc_aws_credential` parameter)
-  - **Access Key ID**: Your AWS access key with permissions for SQS
+  - **Access Key ID**: Your AWS access key with full permissions for SQS (`AmazonSQSFullAccess` policy)
   - **Secret Access Key**: Your AWS secret key
 6. Click **Save**
 
