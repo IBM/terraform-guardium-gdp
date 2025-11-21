@@ -47,16 +47,8 @@ The modules use SSH to upload configuration files to Guardium. You need to:
    ssh-keygen -t rsa -b 4096 -f ~/.ssh/guardium_key
    ```
 
-2. **Add Your Public Key to Guardium**:
-   ```bash
-   # Copy your public key to Guardium
-   ssh-copy-id -i ~/.ssh/guardium_key.pub root@guardium-server
-   ```
-
-3. **Test SSH Access**:
-   ```bash
-   ssh -i ~/.ssh/guardium_key root@your-guardium-server
-   ```
+2. Follow the steps document at [Enabling SSH key pairs for data archive, data export, data mart](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart) to enable data transfer to Central manager. 
+   
 
 ## Troubleshooting
 
