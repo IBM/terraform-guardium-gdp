@@ -47,6 +47,7 @@ The modules use SSH to upload configuration files to Guardium. You need to:
    ssh-keygen -t rsa -b 4096 -f ~/.ssh/guardium_key
    ```
 
+
 2. **Add Your Public Key to Guardium**:
    ```bash
    # Copy your public key to Guardium
@@ -57,6 +58,7 @@ The modules use SSH to upload configuration files to Guardium. You need to:
    ```bash
    ssh -i ~/.ssh/guardium_key root@your-guardium-server
    ``` 
+
 
 ## Troubleshooting
 
