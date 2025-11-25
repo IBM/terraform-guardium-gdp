@@ -33,6 +33,13 @@ resource "terraform_data" "copy_csv" {
   }
 
   provisioner "remote-exec" {
+    inline = [
+      "chown cli:cli ${self.input.path_to_file}",
+      "chmod 644 ${self.input.path_to_file}"
+    ]
+  }
+
+  provisioner "remote-exec" {
     when   = destroy
     inline = ["rm -rf ${self.input.path_to_file}"]
   }
