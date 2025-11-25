@@ -62,4 +62,10 @@ variable "udc_name" {
   type        = string
   default     = ""
   description = "Universal Data Collector name. This will be the unique name used in the UI"
+
+variable "log_directory" {
+  type        = string
+  description = "Directory on Guardium server where CSV configuration files will be stored"
+  default     = "/var/log/guardium"
+}
 }

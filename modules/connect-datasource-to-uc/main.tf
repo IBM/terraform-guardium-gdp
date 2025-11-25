@@ -5,7 +5,8 @@ locals {
 
 resource "terraform_data" "copy_csv" {
   input = {
-    path_to_file     = format("/tmp/%s.csv", var.udc_name)
+    path_to_file     = format("%s/%s.csv", var.log_directory, var.udc_name)
+    log_directory    = var.log_directory
     content          = local.udc_csv
     gdp_server       = var.gdp_server
     gdp_ssh_username = var.gdp_ssh_username
@@ -18,6 +19,14 @@ resource "terraform_data" "copy_csv" {
     user        = self.input.gdp_ssh_username
     private_key = self.input.gdp_private_key
     agent       = "false"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "rm -f ${self.input.log_directory}",
+      "mkdir -p ${self.input.log_directory}",
+      "chmod 755 ${self.input.log_directory}"
+    ]
   }
 
   provisioner "file" {
