@@ -23,9 +23,7 @@ resource "terraform_data" "copy_csv" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo rm -rf ${self.input.log_directory}",
-      "sudo mkdir -p ${self.input.log_directory}",
-      "sudo chmod 775 ${self.input.log_directory}"
+      "mkdir -p ${self.input.log_directory}"
     ]
   }
 
