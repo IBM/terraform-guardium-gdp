@@ -66,6 +66,6 @@ variable "udc_name" {
 variable "log_directory" {
   type        = string
   description = "Directory on Guardium server where CSV configuration files will be stored"
-  default     = "/var/log/guardium"
+  default     = "/home/cli"
 }
 }
