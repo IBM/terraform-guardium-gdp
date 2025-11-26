@@ -47,9 +47,33 @@ The modules use SSH to upload configuration files to Guardium. You need to:
    ssh-keygen -t rsa -b 4096 -f ~/.ssh/guardium_key
    ```
 
-2. Follow the steps document at [Enabling SSH key pairs for data archive, data export, data mart](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart) to enable data transfer to Central manager. 
+2. Follow the steps document at [Enabling SSH key pairs for data archive, data export, data mart](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart) to enable data transfer to Central manager.
 
+### 4. Configure Directory for Universal Connector CSV Upload
 
+For Universal Connector modules that upload CSV profile files, you need to ensure the upload directory is accessible.
+
+After following the [IBM documentation for enabling SSH key pairs](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart), configure your `terraform.tfvars`:
+
+```hcl
+# SSH Configuration for CLI user
+gdp_ssh_username = "cli"
+gdp_ssh_privatekeypath = "~/.ssh/guardium_key"
+
+# Directory Configuration
+# Leave empty to use module defaults (CLI-compatible paths)
+profile_upload_directory = ""  # Module default: /upload
+profile_api_directory = ""     # Module default: /var/IBM/Guardium/file-server/upload
+```
+
+**Default Paths:**
+- `profile_upload_directory`: `/upload` (CLI user's chroot-relative path for SFTP upload)
+- `profile_api_directory`: `/var/IBM/Guardium/file-server/upload` (Full filesystem path for Guardium API)
+
+**Important Notes:**
+- The CLI user provides secure, restricted access
+- The upload directory `/var/IBM/Guardium/file-server/upload` must exist and be writable
+- Files uploaded by CLI user will have `cli:cli` ownership
 
 ## Troubleshooting
 
@@ -76,3 +100,40 @@ If the Universal Connector can't connect to AWS:
 1. Verify that the AWS credentials have the necessary permissions for SQS
 2. Check that the credential name in Guardium matches the one specified in your Terraform configuration
 3. Ensure the AWS region in your Terraform configuration matches the region where your resources are located
+
+### File Upload Issues for Universal Connector
+
+If you encounter errors when uploading CSV files:
+
+**Error: "Permission denied" when uploading files**
+- Verify that SSH key pairs are properly configured following the [IBM documentation](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart)
+- Check that your public key is added to the user's authorized_keys
+- Test SFTP access manually: `sftp -i ~/.ssh/guardium_key <user>@your-guardium-server`
+
+**Error: "Couldn't canonicalize: No such file or directory"**
+- The upload directory doesn't exist or isn't accessible
+- Verify the directory exists: `/var/IBM/Guardium/file-server/upload`
+- Ensure the user has write permissions to the directory
+
+**Error: "Failed to import profiles" in Guardium API**
+- Check that `profile_api_directory` points to the correct filesystem path
+- For CLI user: Use `/var/IBM/Guardium/file-server/upload` for API directory
+- Verify files were successfully uploaded to the directory
+
+**Testing File Upload**
+
+To verify your setup is working correctly:
+
+```bash
+# 1. Test SFTP connection
+sftp -i ~/.ssh/guardium_key <user>@your-guardium-server
+
+# 2. Try uploading a test file
+sftp> put test.csv /var/IBM/Guardium/file-server/upload/test.csv
+
+# 3. Exit SFTP
+sftp> bye
+
+# 4. Verify the file was uploaded successfully
+# Contact your Guardium administrator to verify file presence and permissions
+```
