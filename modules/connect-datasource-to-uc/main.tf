@@ -5,12 +5,12 @@ locals {
 
 resource "terraform_data" "copy_csv" {
   input = {
-    path_to_file     = format("%s/%s.csv", var.log_directory, var.udc_name)
-    log_directory    = var.log_directory
-    content          = local.udc_csv
-    gdp_server       = var.gdp_server
-    gdp_ssh_username = var.gdp_ssh_username
-    gdp_private_key  = file(var.gdp_ssh_privatekeypath)
+    path_to_file              = format("%s/%s.csv", var.profile_upload_directory, var.udc_name)
+    profile_upload_directory  = var.profile_upload_directory
+    content                   = local.udc_csv
+    gdp_server                = var.gdp_server
+    gdp_ssh_username          = var.gdp_ssh_username
+    gdp_private_key           = file(var.gdp_ssh_privatekeypath)
   }
 
   connection {
@@ -46,7 +46,7 @@ output "test" {
 resource "guardium-data-protection_import_profiles" "import_profiles" {
   depends_on = [terraform_data.copy_csv]
   access_token = data.guardium-data-protection_authentication.access_token.access_token
-  path_to_file = format("%s/%s.csv", var.log_directory, var.udc_name)
+  path_to_file = format("%s/%s.csv", var.profile_upload_directory, var.udc_name)
   update_mode = true
 }
 
