@@ -21,12 +21,6 @@ resource "terraform_data" "copy_csv" {
     agent       = "false"
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p ${self.input.log_directory}"
-    ]
-  }
-
   provisioner "file" {
     content     = self.input.content
     destination = self.input.path_to_file
