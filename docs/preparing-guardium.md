@@ -48,7 +48,8 @@ The modules use SSH to upload configuration files to Guardium. You need to:
    ```
 
 2. Follow the steps document at [Enabling SSH key pairs for data archive, data export, data mart](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart) to enable data transfer to Central manager. 
-   
+
+
 
 ## Troubleshooting
 
