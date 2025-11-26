@@ -57,8 +57,9 @@ output "test" {
 }
 
 resource "guardium-data-protection_import_profiles" "import_profiles" {
+  depends_on = [terraform_data.copy_csv]
   access_token = data.guardium-data-protection_authentication.access_token.access_token
-  path_to_file = terraform_data.copy_csv.output.path_to_file
+  path_to_file = format("%s/%s.csv", var.log_directory, var.udc_name)
   update_mode = true
 }
 
