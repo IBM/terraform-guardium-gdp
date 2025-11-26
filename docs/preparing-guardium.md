@@ -58,13 +58,13 @@ For Universal Connector modules that upload CSV profile files, you need to confi
 
 #### Step 1: Configure SSH for SFTP-only Access
 
-SSH into your Guardium server as root and configure SFTP for the CLI user:
+SSH into your Guardium server as CLI user and configure SFTP:
 
 ```bash
-# SSH as root
-ssh root@your-guardium-server
+# SSH as CLI user
+ssh cli@your-guardium-server
 
-# Edit SSH configuration
+# Edit SSH configuration using grdapi
 grdapi edit_file_content file_name=/etc/ssh/sshd_config
 ```
 
@@ -83,14 +83,14 @@ Match User cli
 
 #### Step 2: Set Correct Permissions for Chroot Directory
 
-The chroot directory must be owned by root:
+Use grdapi commands to set permissions (no root access required):
 
 ```bash
-# Set ownership of chroot directory
-chown root:root /var/IBM/Guardium/file-server
+# Set ownership of chroot directory to root
+grdapi run_command command="chown root:root /var/IBM/Guardium/file-server"
 
 # Verify the upload directory exists and has correct permissions
-ls -ld /var/IBM/Guardium/file-server/upload
+grdapi run_command command="ls -ld /var/IBM/Guardium/file-server/upload"
 # Should show: drwxrwxr-x 2 tomcat cli
 ```
 
@@ -131,11 +131,11 @@ sftp> bye
 
 #### Step 6: Verify File Permissions
 
-SSH back as root and verify the uploaded file has correct ownership:
+Verify the uploaded file has correct ownership using grdapi:
 
 ```bash
-ssh root@your-guardium-server
-ls -l /var/IBM/Guardium/file-server/upload/test.csv
+# Still connected as CLI user, verify file ownership
+grdapi run_command command="ls -l /var/IBM/Guardium/file-server/upload/test.csv"
 # Should show: -rw-r--r-- 1 cli cli
 ```
 
@@ -250,11 +250,11 @@ sftp> put test.csv /upload/test.csv
 # 4. Exit SFTP
 sftp> bye
 
-# 5. SSH as root and verify file
-ssh root@your-guardium-server
-ls -l /var/IBM/Guardium/file-server/upload/test.csv
+# 5. Verify file using grdapi (no root access needed)
+ssh cli@your-guardium-server
+grdapi run_command command="ls -l /var/IBM/Guardium/file-server/upload/test.csv"
 # Should show: -rw-r--r-- 1 cli cli
 
-# 6. Clean up test file
-rm /var/IBM/Guardium/file-server/upload/test.csv
+# 6. Clean up test file using grdapi
+grdapi run_command command="rm /var/IBM/Guardium/file-server/upload/test.csv"
 ```
