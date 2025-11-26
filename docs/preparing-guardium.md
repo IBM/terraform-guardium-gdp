@@ -51,9 +51,7 @@ The modules use SSH to upload configuration files to Guardium. You need to:
 
 ### 4. Configure Directory for Universal Connector CSV Upload
 
-For Universal Connector modules that upload CSV profile files, you need to ensure the upload directory is accessible. The modules support two configurations:
-
-#### Option 1: Using CLI User (Recommended)
+For Universal Connector modules that upload CSV profile files, you need to ensure the upload directory is accessible.
 
 After following the [IBM documentation for enabling SSH key pairs](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart), configure your `terraform.tfvars`:
 
@@ -72,25 +70,10 @@ profile_api_directory = ""     # Module default: /var/IBM/Guardium/file-server/u
 - `profile_upload_directory`: `/upload` (CLI user's chroot-relative path for SFTP upload)
 - `profile_api_directory`: `/var/IBM/Guardium/file-server/upload` (Full filesystem path for Guardium API)
 
-#### Option 2: Using Root User (Not Recommended)
-
-If you must use root user, configure your `terraform.tfvars`:
-
-```hcl
-# SSH Configuration for root user
-gdp_ssh_username = "root"
-gdp_ssh_privatekeypath = "~/.ssh/guardium_key"
-
-# Directory Configuration (same path for both when using root)
-profile_upload_directory = "/var/IBM/Guardium/file-server/upload"
-profile_api_directory = "/var/IBM/Guardium/file-server/upload"
-```
-
 **Important Notes:**
-- The CLI user option is more secure as it provides restricted access
+- The CLI user provides secure, restricted access
 - The upload directory `/var/IBM/Guardium/file-server/upload` must exist and be writable
 - Files uploaded by CLI user will have `cli:cli` ownership
-- Files uploaded by root user will have `root:root` ownership
 
 ## Troubleshooting
 
