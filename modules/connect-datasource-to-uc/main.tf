@@ -3,32 +3,31 @@ locals {
   udc_csv = var.udc_csv_parsed
 }
 
+resource "local_file" "csv_temp" {
+  content  = local.udc_csv
+  filename = "${path.module}/.terraform/${var.udc_name}.csv"
+}
+
 resource "terraform_data" "copy_csv" {
+  depends_on = [local_file.csv_temp]
+  
   input = {
-    path_to_file              = format("%s/%s.csv", var.profile_upload_directory, var.udc_name)
+    local_file_path           = local_file.csv_temp.filename
+    remote_file_path          = format("%s/%s.csv", var.profile_upload_directory, var.udc_name)
     profile_upload_directory  = var.profile_upload_directory
-    content                   = local.udc_csv
+    profile_api_directory     = var.profile_api_directory
     gdp_server                = var.gdp_server
     gdp_ssh_username          = var.gdp_ssh_username
-    gdp_private_key           = file(var.gdp_ssh_privatekeypath)
+    gdp_ssh_privatekeypath    = var.gdp_ssh_privatekeypath
   }
 
-  connection {
-    host        = self.input.gdp_server
-    type        = "ssh"
-    user        = self.input.gdp_ssh_username
-    private_key = self.input.gdp_private_key
-    agent       = "false"
-  }
-
-  provisioner "file" {
-    content     = self.input.content
-    destination = self.input.path_to_file
-  }
-
-  provisioner "remote-exec" {
-    when   = destroy
-    inline = ["rm -rf ${self.input.path_to_file}"]
+  provisioner "local-exec" {
+    command = <<-EOT
+      sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${self.input.gdp_ssh_privatekeypath} ${self.input.gdp_ssh_username}@${self.input.gdp_server} <<EOF
+put ${self.input.local_file_path} ${self.input.remote_file_path}
+bye
+EOF
+    EOT
   }
 }
 
@@ -46,7 +45,7 @@ output "test" {
 resource "guardium-data-protection_import_profiles" "import_profiles" {
   depends_on = [terraform_data.copy_csv]
   access_token = data.guardium-data-protection_authentication.access_token.access_token
-  path_to_file = format("%s/%s.csv", var.profile_upload_directory, var.udc_name)
+  path_to_file = format("%s/%s.csv", var.profile_api_directory, var.udc_name)
   update_mode = true
 }
 
