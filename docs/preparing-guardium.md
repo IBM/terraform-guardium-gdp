@@ -81,7 +81,7 @@ profile_api_directory = ""     # Module default: /var/IBM/Guardium/file-server/u
 
 If you encounter errors when registering the OAuth client:
 
-1. Ensure you're in CLI mode (`su cli`)
+1. Ensure you're in CLI mode (`ssh cli`)
 2. Check that you have the necessary permissions
 3. Verify the syntax of the `grdapi` command
 
