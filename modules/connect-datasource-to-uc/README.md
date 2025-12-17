@@ -2,11 +2,13 @@
 
 This Terraform module installs and configures a Universal Data Connector (UDC) in IBM Guardium Data Protection (GDP). The module handles authentication, profile import, and connector installation.
 
+**Supported Versions:** This module requires IBM Guardium Data Protection (GDP) version **12.2.1 and above**.
+
 ## Overview
 
 The Universal Data Connector module provides a standardized way to:
 
-1. Copy a CSV profile configuration to the Guardium server
+1. Upload a CSV profile configuration to the Guardium server via API
 2. Authenticate with the Guardium API
 3. Import the connector profile into Guardium
 4. Install the connector on specified Managed Units
@@ -30,10 +32,6 @@ module "universal_connector" {
   gdp_username           = var.gdp_username
   gdp_password           = var.gdp_password
   
-  # SSH access for file transfer
-  gdp_ssh_username       = var.gdp_ssh_username
-  gdp_ssh_privatekeypath = var.gdp_ssh_privatekeypath
-  
   # Deployment target
   gdp_mu_host            = var.gdp_mu_host
 }
@@ -51,8 +49,6 @@ module "universal_connector" {
 | gdp_port | Port for the Guardium server | `string` | `"8443"` | no |
 | gdp_username | Username for Guardium authentication | `string` | n/a | yes |
 | gdp_password | Password for Guardium authentication | `string` | n/a | yes |
-| gdp_ssh_username | SSH username for Guardium server access | `string` | n/a | yes |
-| gdp_ssh_privatekeypath | Path to SSH private key for Guardium server access | `string` | n/a | yes |
 | gdp_mu_host | Comma-separated list of Guardium Managed Units to deploy the profile | `string` | `""` | no |
 
 ## Outputs
@@ -63,7 +59,7 @@ module "universal_connector" {
 
 ## How It Works
 
-1. The module uses the `terraform_data` resource to copy the CSV profile to the Guardium server via SSH
+1. The module uploads the CSV profile to the Guardium server via API
 2. It authenticates with the Guardium API using the provided credentials
 3. It imports the connector profile using the `guardium-data-protection_import_profiles` resource
 4. It installs the connector on the specified Managed Units using the `guardium-data-protection_install_connector` resource
@@ -100,8 +96,6 @@ module "universal_connector" {
   gdp_port               = var.gdp_port
   gdp_username           = var.gdp_username
   gdp_password           = var.gdp_password
-  gdp_ssh_username       = var.gdp_ssh_username
-  gdp_ssh_privatekeypath = var.gdp_ssh_privatekeypath
   gdp_mu_host            = var.gdp_mu_host
 }
 ```
@@ -109,6 +103,6 @@ module "universal_connector" {
 ## Requirements
 
 - Terraform >= 0.13.0
-- SSH access to the Guardium server
-- Valid Guardium API credentials
+- IBM Guardium Data Protection version 12.2.1 or above
+- Valid Guardium API credentials (OAuth client registered via `grdapi register_oauth_client`)
 - Appropriate permissions to install connectors on the Guardium system
