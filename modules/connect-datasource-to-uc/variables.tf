@@ -42,16 +42,6 @@ variable "gdp_password" {
   sensitive   = true
 }
 
-variable "gdp_ssh_username" {
-  type        = string
-  description = "The ssh user for logging in to Guardium"
-}
-
-variable "gdp_ssh_privatekeypath" {
-  type        = string
-  description = "The path to the ssh privatekey for logging in to Guardium"
-}
-
 variable "gdp_mu_host" {
   type        = string
   description = "Comma separated list of Guardium Managed Units to deploy profile"
@@ -62,22 +52,4 @@ variable "udc_name" {
   type        = string
   default     = ""
   description = "Universal Data Collector name. This will be the unique name used in the UI"
-}
-
-variable "profile_upload_directory" {
-  type        = string
-  description = "Directory path for SFTP upload (chroot path for CLI user)"
-  default     = "/upload"
-}
-
-variable "profile_api_directory" {
-  type        = string
-  description = "Full filesystem path for Guardium API to read CSV files"
-  default     = "/var/IBM/Guardium/file-server/upload"
-}
-
-variable "use_multipart_upload" {
-  type        = bool
-  description = "Use multipart/form-data upload instead of SFTP (recommended). Set to false to use legacy SFTP method."
-  default     = true
 }
