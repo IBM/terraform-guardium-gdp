@@ -21,12 +21,11 @@ These modules build upon the foundational integration capabilities provided by t
 
 Before using these modules, ensure you have:
 
-1. **Guardium Data Protection Cluster**: You must have your own Guardium Data Protection (GDP) cluster set up and running.
+1. **Guardium Data Protection Cluster**: You must have your own Guardium Data Protection (GDP) cluster set up and running. **This module requires GDP version 12.2.1 or above.**
 
 2. **Guardium Configuration**: Complete the one-time manual configurations on your Guardium Data Protection instance as described in the [Preparing Guardium Documentation](docs/preparing-guardium.md). These configurations include:
     - Enabling OAuth client for REST API access
     - Configuring AWS credentials in Universal Connector
-    - Setting up SSH access for Terraform
 
 3. **Terraform Setup**:
 

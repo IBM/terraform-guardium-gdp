@@ -2,11 +2,13 @@
 
 This document outlines the necessary manual configurations required on your Guardium Data Protection instance before using the Terraform modules in this repository.
 
+**Supported Versions:** These modules require IBM Guardium Data Protection (GDP) version **12.2.1 and above**.
+
 ## Prerequisites
 
-- Access to a Guardium Data Protection instance
+- Access to a Guardium Data Protection instance (version 12.2.1 or above)
 - Administrator credentials for the Guardium web interface
-- SSH access to the Guardium appliance
+- CLI access to the Guardium appliance for OAuth client registration
 
 ## Configuration Steps
 
@@ -37,43 +39,9 @@ This command will output a client secret. **Make sure to save this client secret
   - **Secret Access Key**: Your AWS secret key
 6. Click **Save**
 
-### 3. Enable SSH Access for Terraform
+## Configuration Complete
 
-The modules use SSH to upload configuration files to Guardium. You need to:
-
-1. **Create an SSH Key Pair** if you don't already have one:
-   ```bash
-   # Generate a new SSH key pair
-   ssh-keygen -t rsa -b 4096 -f ~/.ssh/guardium_key
-   ```
-
-2. Follow the steps document at [Enabling SSH key pairs for data archive, data export, data mart](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart) to enable data transfer to Central manager.
-
-### 4. Configure Directory for Universal Connector CSV Upload
-
-For Universal Connector modules that upload CSV profile files, you need to ensure the upload directory is accessible.
-
-After following the [IBM documentation for enabling SSH key pairs](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart), configure your `terraform.tfvars`:
-
-```hcl
-# SSH Configuration for CLI user
-gdp_ssh_username = "cli"
-gdp_ssh_privatekeypath = "~/.ssh/guardium_key"
-
-# Directory Configuration
-# Leave empty to use module defaults (CLI-compatible paths)
-profile_upload_directory = ""  # Module default: /upload
-profile_api_directory = ""     # Module default: /var/IBM/Guardium/file-server/upload
-```
-
-**Default Paths:**
-- `profile_upload_directory`: `/upload` (CLI user's chroot-relative path for SFTP upload)
-- `profile_api_directory`: `/var/IBM/Guardium/file-server/upload` (Full filesystem path for Guardium API)
-
-**Important Notes:**
-- The CLI user provides secure, restricted access
-- The upload directory `/var/IBM/Guardium/file-server/upload` must exist and be writable
-- Files uploaded by CLI user will have `cli:cli` ownership
+Once you have completed the above steps, you're ready to use the Terraform modules. The modules will use API-based upload to deploy Universal Connector profiles to your Guardium instance.
 
 ## Troubleshooting
 
@@ -85,14 +53,6 @@ If you encounter errors when registering the OAuth client:
 2. Check that you have the necessary permissions
 3. Verify the syntax of the `grdapi` command
 
-### SSH Access Issues
-
-If you're having trouble with SSH access:
-
-1. Verify that SSH access is enabled for the user you're trying to use
-2. Check that your public key was properly added to the authorized_keys file
-3. Ensure the permissions on the `.ssh` directory and `authorized_keys` file are correct
-
 ### AWS Credential Issues
 
 If the Universal Connector can't connect to AWS:
@@ -101,39 +61,27 @@ If the Universal Connector can't connect to AWS:
 2. Check that the credential name in Guardium matches the one specified in your Terraform configuration
 3. Ensure the AWS region in your Terraform configuration matches the region where your resources are located
 
-### File Upload Issues for Universal Connector
+### API Connection Issues
 
-If you encounter errors when uploading CSV files:
+If you encounter errors when connecting to the Guardium API:
 
-**Error: "Permission denied" when uploading files**
-- Verify that SSH key pairs are properly configured following the [IBM documentation](https://www.ibm.com/docs/en/gdp/12.x?topic=mdarasb-enabling-ssh-key-pairs-data-archive-data-export-data-mart)
-- Check that your public key is added to the user's authorized_keys
-- Test SFTP access manually: `sftp -i ~/.ssh/guardium_key <user>@your-guardium-server`
+**Error: "Failed to authenticate with Guardium API"**
+- Verify that the OAuth client is properly registered using `grdapi register_oauth_client`
+- Check that `gdp_client_id` and `gdp_client_secret` are correct
+- Ensure the Guardium API is accessible from your Terraform execution environment
 
-**Error: "Couldn't canonicalize: No such file or directory"**
-- The upload directory doesn't exist or isn't accessible
-- Verify the directory exists: `/var/IBM/Guardium/file-server/upload`
-- Ensure the user has write permissions to the directory
+**Error: "Connection timeout"**
+- Check network connectivity to the Guardium server
+- Verify firewall rules allow HTTPS (port 8443) from your Terraform environment
+- Confirm the Guardium host address is correct
 
-**Error: "Failed to import profiles" in Guardium API**
-- Check that `profile_api_directory` points to the correct filesystem path
-- For CLI user: Use `/var/IBM/Guardium/file-server/upload` for API directory
-- Verify files were successfully uploaded to the directory
+**Error: "Failed to import profiles"**
+- Verify the OAuth client has appropriate permissions
+- Check Guardium logs for detailed error messages
+- Ensure the Universal Connector profile format is correct
 
-**Testing File Upload**
+## Additional Resources
 
-To verify your setup is working correctly:
-
-```bash
-# 1. Test SFTP connection
-sftp -i ~/.ssh/guardium_key <user>@your-guardium-server
-
-# 2. Try uploading a test file
-sftp> put test.csv /var/IBM/Guardium/file-server/upload/test.csv
-
-# 3. Exit SFTP
-sftp> bye
-
-# 4. Verify the file was uploaded successfully
-# Contact your Guardium administrator to verify file presence and permissions
-```
+- [IBM Guardium Data Protection Documentation](https://www.ibm.com/docs/en/guardium)
+- [Guardium REST API Documentation](https://www.ibm.com/docs/en/guardium/12.2?topic=api-guardium-rest)
+- [Universal Connector Guide](https://www.ibm.com/docs/en/guardium/12.2?topic=connectors-universal-connector)
