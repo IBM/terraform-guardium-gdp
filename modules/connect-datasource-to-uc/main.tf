@@ -39,6 +39,11 @@ resource "guardium-data-protection_install_connector" "install_connector" {
   access_token = data.guardium-data-protection_authentication.access_token.access_token
   udc_name     = local.udc_name
   gdp_mu_host  = var.gdp_mu_host
+
+  lifecycle {
+    # Prevent token rotation from triggering Update, which drops the resource id.
+    ignore_changes = [access_token]
+  }
 }
 
 # Output the generated CSV content for debugging
