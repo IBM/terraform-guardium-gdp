@@ -4,8 +4,10 @@ terraform {
       source = "hashicorp/local"
     }
     guardium-data-protection = {
-      source = "IBM/guardium-data-protection"
-      version = "~> 1.3"
+      # Repo name: terraform-provider-guardium-data-protection
+      source  = "IBM/guardium-data-protection"
+      # Tag: v1.5.2
+      version = "= 1.5.2"
     }
   }
 }
