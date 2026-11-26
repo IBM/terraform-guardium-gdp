@@ -33,12 +33,14 @@ resource "guardium-data-protection_import_profiles" "import_profiles" {
   test_connections = var.test_connections
 }
 
-# Install the Universal Connector on the specified Guardium Managed Unit
+# Install the Universal Connector on the specified Guardium Managed Unit.
+# Skipped (with a warning) when the profile failed its connection test on import.
 resource "guardium-data-protection_install_connector" "install_connector" {
-  depends_on   = [guardium-data-protection_import_profiles.import_profiles]
-  access_token = data.guardium-data-protection_authentication.access_token.access_token
-  udc_name     = local.udc_name
-  gdp_mu_host  = var.gdp_mu_host
+  depends_on    = [guardium-data-protection_import_profiles.import_profiles]
+  access_token  = data.guardium-data-protection_authentication.access_token.access_token
+  udc_name      = local.udc_name
+  gdp_mu_host   = var.gdp_mu_host
+  skip_profiles = guardium-data-protection_import_profiles.import_profiles.failed_connection_test_profiles
 
   lifecycle {
     # Prevent token rotation from triggering Update, which drops the resource id.
