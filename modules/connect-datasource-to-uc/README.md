@@ -64,7 +64,7 @@ module "universal_connector" {
 1. The module uploads the CSV profile to the Guardium server via API
 2. It authenticates with the Guardium API using the provided credentials
 3. It imports the connector profile using the `guardium-data-protection_import_profiles` resource
-4. It installs the connector on the specified Managed Units using the `guardium-data-protection_install_connector` resource
+4. It installs the connector on the specified Managed Units using the `guardium-data-protection_install_connector` resource. If `test_connections` is enabled and the profile's connection test fails, the install is skipped with a warning
 
 ## Example: AWS DocumentDB Integration
 
